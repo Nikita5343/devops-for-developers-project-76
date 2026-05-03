@@ -1,4 +1,5 @@
-- hosts: web
+- hosts: all
   become: true
   roles:
+    - geerlingguy.pip
     - geerlingguy.docker
