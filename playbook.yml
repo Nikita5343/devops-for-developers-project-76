@@ -30,7 +30,15 @@
         state: started
         restart_policy: always
         pull: true
+        recreate: true
         published_ports:
           - "{{ redmine_port }}:3000"
         env_file: "{{ redmine_env_file }}"
       tags: deploy
+
+- hosts: webservers
+  become: true
+
+  roles:
+    - role: datadog.dd.agent
+      tags: monitoring

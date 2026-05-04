@@ -8,3 +8,18 @@ redmine_db_port: 5432
 redmine_db_database: blog
 redmine_db_username: blog
 redmine_db_password: "{{ vault_redmine_db_password }}"
+
+datadog_api_key: "{{ vault_datadog_api_key }}"
+datadog_site: datadoghq.eu
+datadog_agent_major_version: 7
+
+datadog_checks:
+  http_check:
+    init_config:
+    instances:
+      - name: redmine
+        url: "http://localhost:{{ redmine_port }}"
+        timeout: 5
+        method: GET
+        tags:
+          - "service:redmine"
