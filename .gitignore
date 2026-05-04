@@ -1,0 +1,16 @@
+# Ansible
+*.retry
+.vault_pass
+vault-password.txt
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
