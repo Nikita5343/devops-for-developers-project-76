@@ -1,14 +1,15 @@
-- hosts: all
+- name: CI noop
+  hosts: all
   gather_facts: false
 
   tasks:
-    - name: CI noop (skip everything on localhost)
+    - name: Show CI message
       ansible.builtin.debug:
         msg: "Running in CI"
       when: inventory_hostname == "localhost"
 
-
-- hosts: webservers
+- name: Prepare webservers
+  hosts: webservers
   become: true
 
   roles:
@@ -18,8 +19,8 @@
     - role: geerlingguy.docker
       tags: prepare
 
-
-- hosts: webservers
+- name: Deploy Redmine
+  hosts: webservers
   become: true
 
   tasks:
@@ -50,8 +51,8 @@
         env_file: "{{ redmine_env_file }}"
       tags: deploy
 
-
-- hosts: webservers
+- name: Configure Datadog monitoring
+  hosts: webservers
   become: true
 
   roles:
