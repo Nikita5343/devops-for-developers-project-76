@@ -1,2 +1,7 @@
 pip_install_packages:
   - name: docker
+
+redmine_port: 3000
+redmine_image: redmine:latest
+redmine_container_name: redmine
+redmine_env_file: /opt/redmine/.env
