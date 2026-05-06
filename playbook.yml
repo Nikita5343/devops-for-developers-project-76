@@ -9,7 +9,7 @@
       when: inventory_hostname == "localhost"
 
 - name: Prepare webservers
-  hosts: webservers
+  hosts: all
   become: true
 
   roles:
@@ -20,7 +20,7 @@
       tags: prepare
 
 - name: Deploy Redmine
-  hosts: webservers
+  hosts: all
   become: true
 
   tasks:
