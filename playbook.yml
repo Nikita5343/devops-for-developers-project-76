@@ -1,27 +1,24 @@
-- name: CI noop
-  hosts: all
-  gather_facts: false
-
-  tasks:
-    - name: Show CI message
-      ansible.builtin.debug:
-        msg: "Running in CI"
-      when: inventory_hostname == "localhost"
-
+---
 - name: Prepare webservers
   hosts: all
-  become: true
+  become: "{{ inventory_hostname != 'localhost' }}"
 
-  roles:
-    - role: geerlingguy.pip
+  tasks:
+    - name: Install pip
+      ansible.builtin.include_role:
+        name: geerlingguy.pip
       tags: prepare
+      when: inventory_hostname != "localhost"
 
-    - role: geerlingguy.docker
+    - name: Install Docker
+      ansible.builtin.include_role:
+        name: geerlingguy.docker
       tags: prepare
+      when: inventory_hostname != "localhost"
 
 - name: Deploy Redmine
   hosts: all
-  become: true
+  become: "{{ inventory_hostname != 'localhost' }}"
 
   tasks:
     - name: Create Redmine directory
@@ -30,6 +27,7 @@
         state: directory
         mode: "0755"
       tags: deploy
+      when: inventory_hostname != "localhost"
 
     - name: Create Redmine env file
       ansible.builtin.template:
@@ -37,6 +35,7 @@
         dest: "{{ redmine_env_file }}"
         mode: "0644"
       tags: deploy
+      when: inventory_hostname != "localhost"
 
     - name: Run Redmine container
       community.docker.docker_container:
@@ -50,6 +49,7 @@
           - "{{ redmine_port }}:3000"
         env_file: "{{ redmine_env_file }}"
       tags: deploy
+      when: inventory_hostname != "localhost"
 
 - name: Configure Datadog monitoring
   hosts: webservers
