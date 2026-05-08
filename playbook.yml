@@ -1,41 +1,36 @@
 ---
-- name: Prepare webservers
+- name: Prepare servers
   hosts: all
-  become: "{{ inventory_hostname != 'localhost' }}"
+  become: true
 
-  tasks:
-    - name: Install pip
-      ansible.builtin.include_role:
-        name: geerlingguy.pip
-      tags: prepare
-      when: inventory_hostname != "localhost"
+  vars:
+    pip_install_packages:
+      - name: docker
+    docker_install_compose_plugin: false
 
-    - name: Install Docker
-      ansible.builtin.include_role:
-        name: geerlingguy.docker
-      tags: prepare
-      when: inventory_hostname != "localhost"
+  roles:
+    - role: geerlingguy.pip
+    - role: geerlingguy.docker
 
 - name: Deploy Redmine
   hosts: all
-  become: "{{ inventory_hostname != 'localhost' }}"
+  become: true
+
+  vars:
+    redmine_dir: /opt/redmine
 
   tasks:
     - name: Create Redmine directory
       ansible.builtin.file:
-        path: /opt/redmine
+        path: "{{ redmine_dir }}"
         state: directory
         mode: "0755"
-      tags: deploy
-      when: inventory_hostname != "localhost"
 
     - name: Create Redmine env file
       ansible.builtin.template:
         src: templates/redmine.env.j2
         dest: "{{ redmine_env_file }}"
         mode: "0644"
-      tags: deploy
-      when: inventory_hostname != "localhost"
 
     - name: Run Redmine container
       community.docker.docker_container:
@@ -48,8 +43,6 @@
         published_ports:
           - "{{ redmine_port }}:3000"
         env_file: "{{ redmine_env_file }}"
-      tags: deploy
-      when: inventory_hostname != "localhost"
 
 - name: Configure Datadog monitoring
   hosts: webservers
@@ -57,4 +50,3 @@
 
   roles:
     - role: datadog.dd.agent
-      tags: monitoring
