@@ -2,6 +2,7 @@
 - name: Prepare servers
   hosts: all
   become: true
+  gather_facts: false
 
   vars:
     pip_install_packages:
@@ -9,19 +10,31 @@
     docker_install_compose_plugin: false
     docker_service_manage: false
 
-  pre_tasks:
+  tasks:
+    - name: Gather facts for prepare
+      ansible.builtin.setup:
+      tags: prepare
+
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
+      tags: prepare
 
-  roles:
-    - role: geerlingguy.pip
-    - role: geerlingguy.docker
+    - name: Install pip
+      ansible.builtin.include_role:
+        name: geerlingguy.pip
+      tags: prepare
+
+    - name: Install Docker
+      ansible.builtin.include_role:
+        name: geerlingguy.docker
+      tags: prepare
 
 - name: Deploy Redmine
   hosts: all
   become: true
+  gather_facts: false
 
   vars:
     redmine_dir: /opt/redmine
@@ -32,12 +45,14 @@
         path: "{{ redmine_dir }}"
         state: directory
         mode: "0755"
+      tags: deploy
 
     - name: Create Redmine env file
       ansible.builtin.template:
         src: templates/redmine.env.j2
         dest: "{{ redmine_env_file }}"
         mode: "0644"
+      tags: deploy
 
     - name: Run Redmine container
       community.docker.docker_container:
@@ -50,10 +65,13 @@
         published_ports:
           - "{{ redmine_port }}:3000"
         env_file: "{{ redmine_env_file }}"
+      tags: deploy
 
 - name: Configure Datadog monitoring
   hosts: webservers
   become: true
+  gather_facts: false
 
   roles:
     - role: datadog.dd.agent
+      tags: monitoring
