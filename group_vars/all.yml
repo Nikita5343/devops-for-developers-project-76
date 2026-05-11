@@ -1,6 +1,11 @@
 pip_install_packages:
   - name: docker
 
+docker_install_compose_plugin: false
+docker_service_manage: false
+
+redmine_dir: /opt/redmine
+
 redmine_port: 3000
 redmine_image: redmine:latest
 redmine_container_name: redmine

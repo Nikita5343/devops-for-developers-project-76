@@ -2,19 +2,8 @@
 - name: Prepare servers
   hosts: all
   become: true
-  gather_facts: false
-
-  vars:
-    pip_install_packages:
-      - name: docker
-    docker_install_compose_plugin: false
-    docker_service_manage: false
 
   tasks:
-    - name: Gather facts for prepare
-      ansible.builtin.setup:
-      tags: prepare
-
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
@@ -36,9 +25,6 @@
   become: true
   gather_facts: false
 
-  vars:
-    redmine_dir: /opt/redmine
-
   tasks:
     - name: Create Redmine directory
       ansible.builtin.file:
@@ -49,7 +35,7 @@
 
     - name: Create Redmine env file
       ansible.builtin.template:
-        src: templates/redmine.env.j2
+        src: redmine.env.j2
         dest: "{{ redmine_env_file }}"
         mode: "0644"
       tags: deploy
